@@ -1,40 +1,40 @@
 targets:
   code_generators:code_generators:
     builders:
-      code_generators|copyBuilder:
+      code_generators|exportBuildFile:
         enabled: True
-      code_generators|markdownToHtmlBuilder:
-        enabled: True
-      code_generators|blogHomepageBuilder:
-        enabled: True
+      # code_generators|markdownToHtmlBuilder:
+      #   enabled: True
+      # code_generators|blogHomepageBuilder:
+      #   enabled: True
 
 builders:
-  copyBuilder:
-    import: 'package:code_generators/code_generators.dart'
-    builder_factories: ['copyBuilder']
+  exportBuildFile:
+    import: "package:code_generators/code_generators.dart"
+    builder_factories: ["exportBuildFile"]
     build_extensions:
-      .txt:
-        - .copy.txt
+      .json:
+        - .model.dart
     build_to: source
     auto_apply: dependents
-  markdownToHtmlBuilder:
-    import: 'package:code_generators/code_generators.dart'
-    builder_factories: ['markdownToHtmlBuilder']
-    build_extensions:
-      .md:
-        - .html
-    build_to: source
-    auto_apply: dependents
-  blogHomepageBuilder:
-    import: 'package:code_generators/code_generators.dart'
-    builder_factories: ['blogHomepageBuilder']
-    build_extensions:
-      $web$:
-        - index.html
-    build_to: source
-    auto_apply: dependents
+#   markdownToHtmlBuilder:
+#     import: 'package:code_generators/code_generators.dart'
+#     builder_factories: ['markdownToHtmlBuilder']
+#     build_extensions:
+#       .md:
+#         - .html
+#     build_to: source
+#     auto_apply: dependents
+#   blogHomepageBuilder:
+#     import: 'package:code_generators/code_generators.dart'
+#     builder_factories: ['blogHomepageBuilder']
+#     build_extensions:
+#       $web$:
+#         - index.html
+#     build_to: source
+#     auto_apply: dependents
 
-post_process_builders:
-  cleanupUnneededFiles:
-    import: 'package:code_generators/code_generators.dart'
-    builder_factory: cleanupUnneededFiles
+# post_process_builders:
+#   cleanupUnneededFiles:
+#     import: 'package:code_generators/code_generators.dart'
+#     builder_factory: cleanupUnneededFiles

@@ -22,8 +22,7 @@ class BlogHomepageBuilder extends Builder {
       files.add('<li><a href="${fileName}.html">${name}</a></li>');
     }
 
-    var output =
-        AssetId(buildStep.inputId.package, p.join('web', 'index.html'));
+    var output = AssetId(buildStep.inputId.package, p.join('web', 'index.html'));
 
     await buildStep.writeAsString(output, '''
 <html>

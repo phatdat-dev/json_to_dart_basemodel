@@ -19,11 +19,11 @@ class MarkdownToHtmlBuilder extends Builder {
     // Grab the object matching our input file
     var inputId = buildStep.inputId;
 
-    // Create a new target `AssetId`
+    // Create a  target `AssetId`
     var copy = inputId.changeExtension('.html');
     var contents = await buildStep.readAsString(inputId);
 
-    // Write out the new asset
+    // Write out the  asset
     await buildStep.writeAsString(copy, '''
 <html>
   <head>
