@@ -89,7 +89,7 @@ class TypeDefinition {
 
   String _buildParseClass(String expression) {
     final properType = subtype != null ? subtype : name;
-    return ' $properType.fromJson($expression)';
+    return ' $properType().fromJson($expression)';
   }
 
   String _buildToJsonClass(String expression, [bool nullGuard = true]) {
@@ -103,38 +103,39 @@ class TypeDefinition {
     final jsonKey = "json['$key']";
     final fieldKey = fixFieldName(key, typeDef: this, privateField: privateField);
     if (isPrimitive) {
-      if (name == "List") {
-        return "$fieldKey = json['$key'].cast<$subtype>();";
+      if (name == 'List') {
+        return "$fieldKey : (json['$key']!=null) ? List<$subtype>.from(json['$key']) : null,";
       }
-      return "$fieldKey = json['$key'];";
-    } else if (name == "List" && subtype == "DateTime") {
-      return "$fieldKey = json['$key'].map((v) => DateTime.tryParse(v));";
-    } else if (name == "DateTime") {
-      return "$fieldKey = DateTime.tryParse(json['$key']);";
+      return "$fieldKey : json['$key'],";
+    } else if (name == 'List' && subtype == 'DateTime') {
+      return "$fieldKey : json['$key'].map((v) => DateTime.tryParse(v)),";
+    } else if (name == 'DateTime') {
+      return "$fieldKey : DateTime.tryParse(json['$key']),";
     } else if (name == 'List') {
       // list of class
-      return "if (json['$key'] != null) {\n\t\t\t$fieldKey = <$subtype>[];\n\t\t\tjson['$key'].forEach((v) { $fieldKey!.add( $subtype.fromJson(v)); });\n\t\t}";
+
+      return "$fieldKey: json['$fieldKey'] != null ? List<$subtype>.from(json['$fieldKey'].map((x) => $subtype().fromJson(x))) : null,";
     } else {
       // class
-      return "$fieldKey = json['$key'] != null ? ${_buildParseClass(jsonKey)} : null;";
+      return "$fieldKey : json['$key'] != null ? ${_buildParseClass(jsonKey)} : null,";
     }
   }
 
   String toJsonExpression(String key, bool privateField) {
     final fieldKey = fixFieldName(key, typeDef: this, privateField: privateField);
-    final thisKey = 'this.$fieldKey';
+
     if (isPrimitive) {
-      return "data['$key'] = $thisKey;";
+      return "($fieldKey != null) ? data['$key'] = $fieldKey : null;";
     } else if (name == 'List') {
       // class list
-      return """if ($thisKey != null) {
-      data['$key'] = $thisKey!.map((v) => ${_buildToJsonClass('v', false)}).toList();
-    }""";
+      return """
+      (data['$key'] != null) ? data['$key'] = $fieldKey!.map((v) => ${_buildToJsonClass('v', false)}).toList(): null;
+    """;
     } else {
       // class
-      return """if ($thisKey != null) {
-      data['$key'] = ${_buildToJsonClass(thisKey)};
-    }""";
+      return """($fieldKey != null) ? 
+      data['$key'] = ${_buildToJsonClass(fieldKey)}: null;
+    """;
     }
   }
 }
@@ -280,24 +281,24 @@ class ClassDefinition {
       }
       i++;
     });
-    sb.write('});');
+    sb.write(',});');
     return sb.toString();
   }
 
   String get _jsonParseFunc {
     final sb = StringBuffer();
-    sb.write('\t$name');
-    sb.write('.fromJson(Map<String, dynamic> json) {\n');
+    sb.write('\t@override\n\t');
+    sb.write('\t$name fromJson(Map<String, dynamic> json) => $name(\n');
     fields.keys.forEach((k) {
       sb.write('\t\t${fields[k]!.jsonParseExpression(k, privateFields)}\n');
     });
-    sb.write('\t}');
+    sb.write('\t);');
     return sb.toString();
   }
 
   String get _jsonGenFunc {
     final sb = StringBuffer();
-    sb.write('\tMap<String, dynamic> toJson() {\n\t\tfinal Map<String, dynamic> data =  Map<String, dynamic>();\n');
+    sb.write('\t@override\n\tMap<String, dynamic> toJson() {\n\t\tfinal data =  <String, dynamic>{};\n');
     fields.keys.forEach((k) {
       sb.write('\t\t${fields[k]!.toJsonExpression(k, privateFields)}\n');
     });
@@ -306,11 +307,12 @@ class ClassDefinition {
     return sb.toString();
   }
 
+  @override
   String toString() {
     if (privateFields) {
-      return 'class $name {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name extends BaseModel<$name> {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
     } else {
-      return 'class $name {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name extends BaseModel<$name> {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
     }
   }
 }
