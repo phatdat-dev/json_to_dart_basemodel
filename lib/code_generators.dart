@@ -6,7 +6,7 @@ library code_generators;
 
 // import 'package:code_generators/src/blog_homepage_builder.dart';
 import 'package:build/build.dart';
-import 'package:code_generators/src/export_build_file.dart';
+import 'package:code_generators/init_generic/export_build_file.dart';
 // import 'package:code_generators/src/markdown_to_html.dart';
 
 Builder exportBuildFile(BuilderOptions options) => ExportBuildFile();
