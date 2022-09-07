@@ -138,6 +138,12 @@ class TypeDefinition {
     """;
     }
   }
+
+  String jsonParseCopyWith(String key, bool privateField) {
+    final fieldKey = fixFieldName(key, typeDef: this, privateField: privateField);
+
+    return '$fieldKey : $fieldKey ?? this.$fieldKey,';
+  }
 }
 
 class Dependency {
@@ -307,12 +313,27 @@ class ClassDefinition {
     return sb.toString();
   }
 
+  String get _copyWith {
+    final sb = StringBuffer();
+    sb.write('''\t 
+    $name copyWith({
+      ${_fieldList.replaceAll(";", ",")}
+    }) => $name(''');
+
+    fields.keys.forEach((k) {
+      sb.write('${fields[k]!.jsonParseCopyWith(k, privateFields)}\n');
+    });
+
+    sb.write(');');
+    return sb.toString();
+  }
+
   @override
   String toString() {
     if (privateFields) {
-      return 'class $name extends BaseModel<$name> {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name extends BaseModel<$name> {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n$_copyWith\n }\n';
     } else {
-      return 'class $name extends BaseModel<$name> {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name extends BaseModel<$name> {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n$_copyWith\n }\n';
     }
   }
 }
