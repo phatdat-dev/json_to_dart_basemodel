@@ -12,11 +12,9 @@ builders:
   exportBuildFile:
     import: "package:code_generators/code_generators.dart"
     builder_factories: ["exportBuildFile"]
-    build_extensions:
-      .json:
-        - .model.dart
+    build_extensions: { ".json": [".model.dart"] }
     build_to: source
-    auto_apply: dependents
+    auto_apply: root_package
 #   markdownToHtmlBuilder:
 #     import: 'package:code_generators/code_generators.dart'
 #     builder_factories: ['markdownToHtmlBuilder']
